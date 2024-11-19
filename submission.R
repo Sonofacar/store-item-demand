@@ -37,13 +37,13 @@ holidays <- c("ChristmasDay",
               "USThanksgivingDay")
 
 # Load in data
-train_dirty <- vroom("train.csv") %>%
+train_dirty <- vroom("../input/demand-forecasting-kernels-only/train.csv") %>%
   mutate(year = year(date),
          month = month(date)) %>%
   left_join(inf_df, by = c("year", "month")) %>%
   select(!year) %>%
   select(!month)
-test_dirty <- vroom("test.csv") %>%
+test_dirty <- vroom("../input/demand-forecasting-kernels-only/test.csv") %>%
   mutate(year = year(date),
          month = month(date)) %>%
   left_join(inf_df, by = c("year", "month")) %>%
