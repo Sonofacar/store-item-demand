@@ -64,7 +64,9 @@ recipe <- recipe(sales ~ ., train_dirty) %>%
 
 # Set up output
 input <- train_dirty
+input$pred <- 0
 output <- test_dirty
+output$sales <- 0
 
 # Create the model and workflow
 penalized_model <- linear_reg(penalty = tune(), mixture = tune()) %>%
@@ -75,6 +77,7 @@ penalized_workflow <- workflow() %>%
   add_recipe(recipe)
 
 # Fit a penalized regression for each store-item combination
+count <- 1
 stores <- 1:10
 items <- 1:50
 for (store in stores) {
@@ -113,18 +116,19 @@ for (store in stores) {
                                  new_data = tmp_train)$.pred
 
     # Put training predictions in the original dataset
-    tmp_train$pred <- train_predictions
-    input <- left_join(input,
-                       tmp_train[c("date", "store", "item", "pred")],
-                       by = c("date", "store", "item"))
+    input[(input$store == store)
+          & (input$item == item), "pred"] <- train_predictions
 
     # Put predictions in output data frame
-    tmp_test$sales <- penalized_predictions
-    output <- left_join(output, tmp_test[c("id", "sales")], by = "id")
+    output[(output$store == store)
+           & (output$item == item), "sales"] <- penalized_predictions
 
     # Print to monitor progress
-    paste("Store: ", store, "\t", "Item: ", item, sep = "") %>%
+    paste("Store: ", store, "\t",
+          "Item: ", item, "\t",
+          "Count: ", count, "/500", sep = "") %>%
       write(stdout())
+    count <- count + 1
   }
 }
 
