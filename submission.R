@@ -121,6 +121,10 @@ for (store in stores) {
     # Put predictions in output data frame
     tmp_test$sales <- penalized_predictions
     output <- left_join(output, tmp_test[c("id", "sales")], by = "id")
+
+    # Print to monitor progress
+    paste("Store: ", store, "\t", "Item: ", item, sep = "") %>%
+      write(stdout())
   }
 }
 
