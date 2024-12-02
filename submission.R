@@ -27,9 +27,17 @@ inf_df <- tibble(date = seq(as.Date("2013/1/1"),
 
 # Load in data
 train_dirty <- vroom("../input/demand-forecasting-kernels-only/train.csv") %>%
-  left_join(inf_df, by = c("year", "month"))
+  mutate(year = year(date),
+         month = month(date)) %>%
+  left_join(inf_df, by = c("year", "month")) %>%
+  select(!year) %>%
+  select(!month)
 test_dirty <- vroom("../input/demand-forecasting-kernels-only/test.csv") %>%
-  left_join(inf_df, by = c("year", "month"))
+  mutate(year = year(date),
+         month = month(date)) %>%
+  left_join(inf_df, by = c("year", "month")) %>%
+  select(!year) %>%
+  select(!month)
 
 # Set up output
 output <- test_dirty
