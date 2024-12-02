@@ -4,6 +4,8 @@ library(tidyverse)
 library(vroom)
 library(stacks)
 library(doParallel)
+library(modeltime)
+library(timetk)
 
 # find number of cores
 num_cores <- 4
@@ -24,9 +26,9 @@ inf_df <- tibble(date = seq(as.Date("2013/1/1"),
   select(!date)
 
 # Load in data
-train_dirty <- vroom("train.csv") %>%
+train_dirty <- vroom("../input/demand-forecasting-kernels-only/train.csv") %>%
   left_join(inf_df, by = c("year", "month"))
-test_dirty <- vroom("test.csv") %>%
+test_dirty <- vroom("../input/demand-forecasting-kernels-only/test.csv") %>%
   left_join(inf_df, by = c("year", "month"))
 
 # Set up output
