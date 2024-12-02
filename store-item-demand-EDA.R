@@ -7,7 +7,7 @@ data <- vroom("train.csv")
 
 stores <- sample(data$store %>% unique, 2)
 items <- sample(data$item %>% unique, 2)
-colors <- c("blue", "darkgreen")
+colors <- c("darkblue", "darkgreen")
 
 plot <- NULL
 for (i in 1:2) {
@@ -42,4 +42,7 @@ for (i in 1:2) {
     theme_classic()
   plot <- plot / (tmp1 | tmp2 | tmp3)
 }
+png("graph.png", width = 1920, height = 1080)
+print(plot)
+dev.off()
 
