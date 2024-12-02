@@ -68,9 +68,8 @@ for (store in stores) {
     # Tune
     cl <- makePSOCKcluster(num_cores)
     registerDoParallel(cl)
-    prophet_cv %>%
-      modeltime_forecast(new_data = testing(folds),
-                         actual_data = training(folds))
+    prophet_cv <- modeltime_calibrate(prophet_model,
+                                      new_data = testing(folds))
     stopCluster(cl)
 
     # Fit model and make predictions
