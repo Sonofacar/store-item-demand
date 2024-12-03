@@ -76,11 +76,11 @@ for (store in stores) {
     prophet_fit <- prophet_cv %>%
       modeltime_refit(data = tmp_train)
     prophet_predictions <- prophet_fit %>%
-      modeltime_forecast(new_data = tmp_test)$.value
+      modeltime_forecast(new_data = tmp_test)
 
     # Put predictions in output data frame
     output[(output$store == store)
-           & (output$item == item), "sales"] <- prophet_predictions
+           & (output$item == item), "sales"] <- prophet_predictions$.value
 
     # Print to monitor progress
     paste("Store: ", store, "\t",
