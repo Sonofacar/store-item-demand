@@ -75,7 +75,8 @@ for (store in stores) {
     # Fit model and make predictions
     prophet_fit <- prophet_cv %>%
       modeltime_refit(data = tmp_train)
-    prophet_predictions <- modeltime_forecast(new_data = tmp_test)$.value
+    prophet_predictions <- prophet_fit %>%
+      modeltime_forecast(new_data = tmp_test)$.value
 
     # Put predictions in output data frame
     output[(output$store == store)
