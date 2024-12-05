@@ -3,6 +3,9 @@ library(tidymodels)
 library(tidyverse)
 library(vroom)
 library(stacks)
+library(encode)
+library(bonsai)
+library(lightgbm)
 
 # Holidays
 holidays <- c("ChristmasDay",
@@ -54,13 +57,11 @@ output$sales <- 0
 
 # Recipe
 recipe <- recipe(sales ~ ., train_dirty) %>%
+  step_date(date, features = c("dow", "month", "decimal", "doy", "year")) %>%
+  step_range(date_doy, min = 0, max = pi) %>%
+  step_mutate(sinDOY = sin(date_doy), cosDOY = cos(date_doy)) %>%
   step_holiday(date, holidays = holidays) %>%
-  step_date(date, features = "decimal") %>%
-  step_date(date, features = "dow", label = FALSE) %>%
-  step_mutate(date_dow = factor(date_dow)) %>%
-  step_dummy(date_dow) %>%
-  step_mutate(sinYear = sin(date_decimal * pi * 2),
-              cosYear = cos(date_decimal * pi * 2)) %>%
+  step_lencode_mixed(all_nominal_predictors(), outcome = vars(sales)) %>%
   step_rm(date, store, item) %>%
   step_normalize(all_predictors())
 # Model
@@ -79,15 +80,15 @@ wflow <- workflow() %>%
 count <- 1
 stores <- 1:10
 items <- 1:50
-for (store in stores) {
-  for (item in items) {
+for (s in stores) {
+  for (i in items) {
     # Get data segments
     tmp_train <- train_dirty %>%
-      filter(store == store) %>%
-      filter(item == item)
+      filter(store == s) %>%
+      filter(item == i)
     tmp_test <- test_dirty %>%
-      filter(store == store) %>%
-      filter(item == item)
+      filter(store == s) %>%
+      filter(item == i)
 
     # Fit model
     f <- wflow %>%
@@ -95,12 +96,12 @@ for (store in stores) {
     preds <- predict(f, new_data = tmp_test)$.pred
 
     # Save output
-    output[(output$store == store)
-           & (output$item == item), "sales"] <- preds
+    output[(output$store == s)
+           & (output$item == i), "sales"] <- preds
 
     # Print to monitor progress
-    paste("Store: ", store, "\t",
-          "Item: ", item, "   \t",
+    paste("Store: ", s, "\t",
+          "Item: ", i, "   \t",
           "Count: ", count, "/500", sep = "") %>%
       write(stdout())
     count <- count + 1
