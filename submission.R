@@ -67,7 +67,7 @@ recipe <- recipe(sales ~ ., train_dirty) %>%
 # Model
 model <- boost_tree(tree_depth = 2,
                     trees = 1000,
-                    learn_rate = 0.01) %>%
+                    learn_rate = tune()) %>%
   set_engine("xgboost") %>%
   set_mode("regression")
 
@@ -90,8 +90,19 @@ for (s in stores) {
       filter(store == s) %>%
       filter(item == i)
 
+    # Cross validate
+    folds <- vfold_cv(tmp_train, v = 10, repeats = 1)
+    tune_grid <- grid_regular(learn_rate(), levels = 5)
+    cv <- wflow %>%
+      tune_grid(resamples = folds,
+                grid = tune_grid,
+                metrics = metric_set(smape))
+    best <- cv %>%
+      select_best(metric = "smape")
+
     # Fit model
     f <- wflow %>%
+      finalize_workflow(best) %>%
       fit(data = tmp_train)
     preds <- predict(f, new_data = tmp_test)$.pred
 
