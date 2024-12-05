@@ -6,6 +6,9 @@ library(stacks)
 library(embed)
 library(bonsai)
 library(lightgbm)
+library(doParallel)
+
+num_cores <- 2
 
 # Holidays
 holidays <- c("ChristmasDay",
@@ -92,11 +95,14 @@ for (s in stores) {
 
     # Cross validate
     folds <- vfold_cv(tmp_train, v = 10, repeats = 1)
-    tune_grid <- grid_regular(learn_rate(), levels = 5)
+    tune_grid <- grid_regular(learn_rate(), levels = 4)
+    cl <- makePSOCKcluster(num_cores)
+    registerDoParallel(cl)
     cv <- wflow %>%
       tune_grid(resamples = folds,
                 grid = tune_grid,
                 metrics = metric_set(smape))
+    stopCluster(cl)
     best <- cv %>%
       select_best(metric = "smape")
 
