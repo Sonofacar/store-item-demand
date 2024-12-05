@@ -3,7 +3,7 @@ library(tidymodels)
 library(tidyverse)
 library(vroom)
 library(stacks)
-library(encode)
+library(embed)
 library(bonsai)
 library(lightgbm)
 
